@@ -58,9 +58,30 @@ jobs:
         with:
           path: 'output'
 
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    # Paso 1: Clona el repositorio
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Paso 2: Instala Java 11 desde Temurin (recomendado por GitHub)
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Checkstyle
+        run: |
+          mvn checkstyle:checkstyle
+          cp -r target/site/* output/
+
   # Job separado para el despliegue
   deploy:
-    needs: build  # Este job se ejecuta solo si el job "build" fue exitoso
+    needs: test  # Este job se ejecuta solo si el job "test" fue exitoso
     runs-on: ubuntu-latest
     environment:
       name: github-pages  # Define el entorno de despliegue para Pages
